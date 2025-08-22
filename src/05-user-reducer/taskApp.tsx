@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useReducer, useState } from 'react';
 
 import { Plus, Trash2, Check } from 'lucide-react';
 
@@ -6,34 +6,67 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { getTaskInitialState, taskReducer } from './reducer/taskReducer';
 
-interface Todo {
-  id: number;
-  text: string;
-  completed: boolean;
-}
+// interface Todo {
+//   id: number;
+//   text: string;
+//   completed: boolean;
+// }
+
 
 export const TasksApp = () => {
-  const [todos, setTodos] = useState<Todo[]>([]);
+  // const [todos, setTodos] = useState<Todo[]>([]);
   const [inputValue, setInputValue] = useState('');
+  const [state, dispatch] = useReducer(taskReducer,getTaskInitialState());
+
+  const {todos,completedTask,incompletedTask,length} = state;
+
+
+  useEffect(()=>{
+    localStorage.setItem('task-state',JSON.stringify(state));
+  },[state])
 
   const addTodo = () => {
-    console.log('Agregar tarea', inputValue);
+    if(inputValue.length <=0) return;
 
+    // const newTodo: Todo = {
+    //   id: Date.now(),
+    //   completed: false,
+    //   text: inputValue
+    // };
+
+    // setTodos([...todos,newTodo]);
+    // LOGICA DEL REDUCER
+    dispatch({type: 'ADD_TODO',payload: inputValue});
+
+    setInputValue('');
   };
 
   const toggleTodo = (id: number) => {
-    console.log('Cambiar de true a false', id);
-
+    // const updatedTodos = todos.map(todo=>{
+    //   if(todo.id === id){
+    //     return {...todo, completed: !todo.completed}
+    //   }
+    //   return todo;
+    // });
+    // setTodos(updatedTodos);
+    dispatch({payload: id,type: 'TOGGLE_TODO'});
   };
 
   const deleteTodo = (id: number) => {
-    console.log('Eliminar tarea', id);
+    // const newTodos = todos.filter(todo=>todo.id !== id);
+
+    // setTodos(newTodos);
+
+    dispatch({payload: id,type:'DELETE_TODO'});
 
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    console.log('Presiono enter');
+    if(e.key === 'Enter'){
+      addTodo();
+    }
 
   };
 
